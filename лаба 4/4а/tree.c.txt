@@ -1,0 +1,257 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include "type.h"
+#include "tree.h"
+void show2(Node *root, int space) {
+    if (!root)
+        return;
+    enum { COUNT = 2 };
+    space += COUNT;
+    show2(root->right, space);
+    for (int i = COUNT; i < space; ++i)
+        printf(" ");
+    printf("%s\n", root->key);
+    show2(root->left, space);
+}
+int add(Node **root, Node *x){
+    if ((*root) == NULL){
+        (*root) = x;
+        return -1;
+    }
+    if (strcmp(x->key, (*root)->key) > 0){
+        add(&(*root)->right, x);
+    }
+    else if (strcmp(x->key, (*root)->key) < 0){
+        add(&(*root)->left, x);
+    }
+    else{
+        int data = (*root)->info->data;
+        (*root)->info->data = x->info->data;
+        return data;
+    }
+}
+Node *findPar(Node **root, char *key){
+    if (*root == NULL){
+        return *root;
+    }
+    if ((*root)->left != NULL && strcmp((*root)->left->key, key) == 0){
+        return (*root);
+    }
+    if ((*root)->right != NULL && strcmp((*root)->right->key, key) == 0){
+        return (*root);
+    }
+    if (strcmp(key, (*root)->key) < 0) {
+        return findPar(&(*root)->left, key);
+    }
+    else{
+        return findPar(&(*root)->right, key);
+    }
+}
+Node *find_min(Node **root){
+    Node *tmp = *root;
+    while (tmp -> left != NULL) {
+        tmp = tmp->left;
+    }
+    return tmp;
+}
+Node *find(Node **root, char *key){
+    if ((*root) == NULL || strcmp((*root)->key, key) == 0){
+        return *root;
+    }
+    if (strcmp(key, (*root)->key) < 0) {
+        return find(&(*root)->left, key);
+    }
+    else if (strcmp(key, (*root)->key) > 0){
+        return find(&(*root)->right, key);
+    }
+    else{
+        return NULL;
+    }
+}
+int input(Node **root) {
+    FILE *start;
+    printf("Введите название файла:\n");
+    char *st = getStr(), st1[100], st2[100];
+    start = fopen(st, "r");
+    if (start == NULL) {
+        printf("Такого файла не существует.\n");
+        free(st);
+        return 1;
+    }
+    while (!feof(start)){
+        char buf[1] = {0}, *res;
+        int f = 1, str_len = 0;
+        res = malloc(sizeof(char));
+        while(f == 1){
+            int buflen = 0;
+            fscanf(start, "%1[^\n]%n", buf, &buflen);
+            if (buflen == 1){
+                res = realloc(res, sizeof(char) * (str_len + 2));
+                res[str_len] = buf[0];
+                str_len += 1;
+            }
+            else{
+                f = 0;
+            }
+        }
+        if (str_len == 0){
+            free(res);
+            fscanf(start, "%*1[\n]");
+        }
+        else{
+            int data;
+            fscanf(start, "%*1[\n]");
+            fscanf(start, "%d", &data);
+            res[str_len] = '\0';
+            Node *x = malloc(sizeof(Node));
+            x->key = res;
+            x->info = malloc(sizeof(Info));
+            x->info->data = data;
+            x->left = NULL;
+            x->right = NULL;
+            add(root, x);
+        }
+    }
+    free(st);
+    fclose(start);
+    return 1;
+}
+int del(Node **root, char *key){
+    Node *y = find(&(*root), key);
+    if (y == NULL){
+        return 0;
+    }
+    if (strcmp((*root)-> key, key) == 0){
+        if ((*root)->right == NULL && (*root)->left == NULL){
+            free((*root)->key);
+            free((*root)->info);
+            *root = NULL;
+            free(y);
+            return 1;
+        }
+        else if ((*root)->right != NULL && (*root)->left != NULL){
+            Node *tmp = find_min(&(*root)->right);
+            (*root)->info->data = tmp->info->data;
+            free((*root)->key);
+            (*root)->key = strdup(tmp->key);
+            del(&(*root)->right, tmp->key);
+            return 1;
+        }
+        else if ((*root)->right != NULL){
+            free((*root)->key);
+            free((*root)->info);
+            (*root) = (*root)->right;
+            free(y);
+            return 1;
+        }
+        else if ((*root)->left != NULL){
+            free((*root)->key);
+            free((*root)->info);
+            (*root) = (*root)->left;
+            free(y);
+            return 1;
+        }
+    }
+    Node *par = findPar(&(*root), key);
+    if (y->left == NULL && y->right == NULL){
+        if (par->left != NULL && strcmp(par->left->key,key) == 0){
+            par->left = NULL;
+        }
+        else if (par->right != NULL && strcmp(par->right->key,key) == 0){
+            par->right = NULL;
+        }
+        free(y->info);
+        free(y->key);
+        free(y);
+        return 1;
+    }
+    else if (y->left != NULL && y->right != NULL){
+        Node *tmp = find_min(&y->right);
+        y->info->data = tmp->info->data;
+        free(y->key);
+        y->key = strdup(tmp->key);
+        del(&y->right, tmp->key);
+        return 1;
+    }
+    else{
+        if (y->left != NULL){
+            if (par->left != NULL && strcmp(par->left->key,key) == 0){
+                par->left = y->left;
+            }
+            else if (par->right != NULL && strcmp(par->right->key,key) == 0){
+                par->right = y->left;
+            }
+            free(y->info);
+            free(y->key);
+            free(y);
+            return 1;
+        }
+        else {
+            if (par->left != NULL && strcmp(par->left->key,key) == 0){
+                par->left = y->right;
+            }
+            else if (par->right != NULL && strcmp(par->right->key,key) == 0){
+                par->right = y->right;
+            }
+            free(y->info);
+            free(y->key);
+            free(y);
+            return 1;
+        }
+    }
+}
+int obxod(Node **root){
+    if (*root == NULL)
+        return 1;
+    printf("%s ", (*root)->key);
+    obxod(&(*root)->left);
+    obxod(&(*root)->right);
+    return 1;
+}
+int full(Node **root){
+    printf("Введите число элементов:\n");
+    int n = getInt();
+    for (int i = 0; i < n; i++){
+        int data = i;
+        char *res = malloc(sizeof(char));
+        int len = 0;
+        int k = data;
+        while (data>0){
+            res = realloc(res, sizeof(char) * (len + 2));
+            res[len] = '1' + data%10 -1;
+            len += 1;
+            data /= 10;
+        }
+        res[len] = '\0';
+        Node *x = malloc(sizeof(Node));
+        x->key = strdup(res);
+        x->info = malloc(sizeof(Info));
+        x->info->data = data;
+        x->left = NULL;
+        x->right = NULL;
+        add(root, x);
+        free(res);
+    }
+    return 1;
+}
+int clear(Node **root){
+    if (*root == NULL){
+        return 1;
+    }
+    if ((*root)->left){
+        clear(&(*root)->left);
+    }
+    if ((*root)->right){
+        clear(&(*root)->right);
+    }
+    if ((*root)->key){
+        free((*root)->key);
+    }
+    if ((*root)->info){
+        free((*root)->info);
+    }
+    free(*root);
+    return 1;
+}

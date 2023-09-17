@@ -1,0 +1,71 @@
+#include <stdio.h>
+#include <malloc.h>
+#include "tasks.h"
+//  typedef struct Line{
+//      int n;
+//      int *a;
+//  } Line;
+//  typedef struct Matrix{
+//      int lines;
+//      Line *matr;
+//  } Matrix;
+
+Matrix* process(Matrix* matr){
+   Matrix matr_new = {0 , NULL};
+   int maxel = 0 ;
+   int maxstring = 0 ;
+   for (int i = 0 ; i < matr->lines ; i++){
+       for (int j = 0 ; j <matr->matr[i].n ; j++){
+           if( maxel < matr->matr[i].a[j] ){
+               maxel = matr->matr[i].a[j];
+               maxstring = i ;
+           }
+       }
+   }
+    printf("'\nbro : %d\n",maxstring);
+   Matrix* ptr = &matr_new;
+   ptr->lines = matr->lines;
+   ptr->matr = (Line * )malloc(matr->lines * sizeof(Line));
+   ptr->matr[0].a = (int *)malloc( (matr->matr[maxstring].n)* sizeof (int));
+   ptr->matr[0].n = matr->matr[maxstring].n;
+   for(int i = 0 ; i <matr->matr[maxstring].n;i++){
+       ptr->matr[0].a[i] = matr->matr[maxstring].a[i];
+   }
+   for (int i = 0 ; i < maxstring ; i++){
+       ptr->matr[i+1].a = (int *)malloc( (matr->matr[i].n)* sizeof (int));
+       ptr->matr[i+1].n = matr->matr[i].n;
+       for (int j = 0 ; j < matr->matr->n; j++){
+           ptr->matr[i+1].a[j]=matr->matr[i].a[j];
+       }
+   }
+    for (int i = maxstring ; i < matr->lines ; i++){
+        ptr->matr[i].n = matr->matr[i].n;
+        ptr->matr[i].a = (int *)malloc( (matr->matr[i].n)* sizeof (int));
+        for (int j = 0 ; j < matr->matr->n; j++){
+            ptr->matr[i].a[j]=matr->matr[i].a[j];
+        }
+    }
+    output("output matrix" , *ptr);
+    return ptr;
+}
+
+int main(){
+    Matrix matr = {0, NULL};
+    Matrix matr_new = {0, NULL};
+    Matrix matr_test = {0, NULL};
+    if (input(&matr , &matr_new) == 0){
+        erase(&matr);
+        erase(&matr_new);
+        printf("%s\n", "End of file occured");
+        return 1;
+    }
+    //line_min(matr,matr_new);
+    Matrix *matr_test_ptr = &matr_test;
+    matr_test_ptr  = process(&matr);
+    output("Source matrix", matr);
+    //output("New matrix", matr_new);
+    //output("New matrix", matr_test);
+    erase(&matr);
+    erase(&matr_new);
+    return 0;
+}

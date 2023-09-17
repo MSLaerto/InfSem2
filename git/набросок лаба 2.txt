@@ -1,0 +1,88 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+void partlen(const char *st, int *len){
+    char c = st[0];
+    int i = 0;
+    while (c != 0)
+    {
+        i++;
+        c = st[i];
+    }
+    *len = i;
+}
+void addbuf(char *res, char *buf, size_t n){
+    if (n == 0) {
+        return;
+    }
+    for (int i = 0; i < n; i++) {
+        res[i] = buf[i];
+    }
+}
+char *input(int *len){
+    char buf[10] = {0};
+    char *res = NULL;
+    int n;
+    do
+    {
+        n = scanf("%10[^\n]", buf);
+        if (n < 0)
+        {
+            return NULL;
+        }
+        else if (n > 0)
+        {
+            int buflen;
+            partlen(buf, &buflen);
+            int str_len = *len + buflen;
+            res = realloc(res, sizeof(char) * (str_len + 1));
+            addbuf(res + *len, buf, buflen);
+            *len = str_len;
+        }
+        else
+        {
+            scanf("%*c");
+        }
+    } while (n > 0);
+    if (*len > 0) {
+        res[(*len)] = '\0';
+    }
+
+
+    return res;
+}
+
+void process(char* str ,int len){
+    int pfg = 0 ;
+    int a , b ;
+    printf("\n");
+    for (int i = 0 ; i <= len ; i++){
+        if (str[i] == '*'){
+            pfg = 1 ; 
+        }
+        if (str[i] == ' '){
+            pfg = 0 ;
+        }
+        if (((a = str[i]) <=122) && ((b = str[i]) >=97)){
+            printf("%c", str[i]);
+        }
+    }
+}
+
+
+int main(){
+    char *stroka;
+    do {
+        int len = 0;
+        printf("Input string:");
+        stroka = input(&len);
+        if (stroka != NULL){
+            process(stroka , len);
+            printf("\"%s\" \n", stroka);
+            free(stroka);
+        }
+    } while (stroka != NULL);
+    printf("\n");
+    return 0;
+}

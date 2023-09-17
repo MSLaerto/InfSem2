@@ -1,0 +1,18 @@
+#ifndef TREE_H
+#define TREE_H
+void inorder(Node *root, Node ***root2, int *len);
+int count(Node *root);
+Node *rebalance(int left, int right, Node *root, Node ***root2);
+int balance(Node **root, Tree **tree);
+int add(Node **par, Node **root, char *key, int data, Tree **tree);
+Node *findPar(Node **root, char *key);
+Node *find_min(Node **root);
+Node *find(Node **root, char *key);
+int input(Tree **tree);
+int full(Tree **Tree);
+int del(Node **root, char *key, Tree **tree);
+int obxod(Node **root);
+Node *find_max(Node **root, char* n);
+int clear(Node **root);
+#endif
+

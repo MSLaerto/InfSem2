@@ -1,0 +1,67 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "type.h"
+#include "input.h"
+#include "menu.h"
+#include "table.h"
+int menu(){
+    const char *msg[] = {"0. Quit", "1. Add", "2. Find", "3. Delete", "4. Clean Show", "5. Dirty Show", "6. File"};
+    const int msg_count = sizeof(msg) / sizeof(msg[0]);
+    int n;
+    for (int i = 0; i < msg_count; i++){
+        printf("%s\n", msg[i]);
+    }
+    printf("Enter value:\n");
+    do{
+        n = getInt();
+        if (n < msg_count && n >= 0){
+            return n;
+        }
+        printf("An incorrect number was entered. Try again.\n");
+    } while(n >= msg_count);
+}
+int menu_add(Table *board){
+    printf("Enter key value:\n");
+    unsigned int key = getInt();
+    printf("Enter value:\n");
+    unsigned int el = getInt();
+    if (Add(board, key, el) == 0){
+        printf("The table is full\n");
+    }
+    return 1;
+}
+int menu_find(Table *board){
+    printf("Enter key value:\n");
+    unsigned int key = getInt();
+    Table board2 = Find(board, key);
+    if (board2.msize == 0){
+        printf("No such element exists\n");
+    }
+    else{
+        DirtyShow(&board2);
+    }
+    for (int i = 0; i < board2.msize; i++){
+        if (board2.ks[i].info && board2.ks[i].info->element) {
+            free(board2.ks[i].info);
+        }
+    }
+    free(board2.ks);
+    return 1;
+}
+int menu_delete(Table *board){
+    printf("Enter the item to be removed:\n");
+    unsigned int key = getInt();
+    Table board2 = Find(board, key);
+    if (board2.msize == 0){
+        printf("No such element exists\n");
+        return 1;
+    }
+    Delete(board, key);
+    for (int i = 0; i < board2.msize; i++){
+        if (board2.ks[i].info && board2.ks[i].info->element)
+            free(board2.ks[i].info);
+    }
+    free(board2.ks);
+    return 1;
+}

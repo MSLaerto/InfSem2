@@ -1,0 +1,24 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include "type.h"
+#include "help.h"
+#include "tree.h"
+int main() {
+    Node *root = NULL;
+    int num_func;
+    int (*fptr[])(Node **) = {NULL, show1, menu_add, menu_del, menu_find, menu_min_find, menu_obxod, input, full};
+    while(num_func = menu()){
+        clock_t before = clock();
+        if (!fptr[num_func](&root)){
+            break;
+        }
+        clock_t difference = clock() - before;
+        double msec = difference * 1000 / CLOCKS_PER_SEC;
+        printf("Time taken %f milliseconds\n", msec);
+    }
+    clear(&root);
+    printf("END");
+    return 0;
+}

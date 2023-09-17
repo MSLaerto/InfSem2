@@ -1,0 +1,138 @@
+void firstfunc (int *a, const int *b){
+    int del_num , num , i = 0 , d = 0;
+    int *temp_ar;
+    temp_ar = (int*)malloc(100 * sizeof(int));
+    printf ("Enter the number of the element to which we will add / replace: ");
+    int firstfunc_prov = scanf ("%d", &del_num );
+    while (firstfunc_prov != 1 && del_num < 0){
+        printf ("Enter a valid value: ");
+        scanf("%*[^\n]");
+        scanf("%*c");
+        firstfunc_prov = scanf("%d", &del_num);
+    }
+    printf("Enter new value:");
+    scanf ("%d", &num);
+    if ( del_num <= *b){
+        while (d < *b + 1){
+            if (d > del_num){
+                temp_ar[d]=a[d-1];
+                d++;
+            }
+            if (d == del_num){
+                temp_ar[d] = num;
+                d++;
+            }
+            if (d < del_num ){
+                temp_ar[d]=a[d];
+                d++;
+            }
+        }
+    }
+    if(del_num>*b){
+        while (d < *b + 1){
+            if (d < *b ){
+                temp_ar[d]=a[d];
+                d++;
+            }
+            if (d == *b){
+                temp_ar[d] = num;
+                d++;
+            }
+            if (d > del_num){
+                temp_ar[d]=a[d-1];
+                d++;
+            }
+        }
+    }
+    while (i < *b + 1){
+        a[i]=temp_ar[i];
+        i++;
+    }
+    free(temp_ar);
+}
+
+void secondfunc(int*a,int *p_head,int delete_el)
+{
+    int len =*p_head, i =0 , j=0;
+    int *temp_ar;
+    *p_head = len - 1;
+    temp_ar = (int*)malloc(100 * sizeof(int));
+    while ( delete_el > len ||delete_el < 0){
+        printf("Enter a valid value: ");
+        scanf("%d", &delete_el );
+    }
+    while ( i < len - 1){
+        if ( i >= delete_el){
+            temp_ar[i] = a[i+1];
+            i++;
+        }
+        if (i < delete_el){
+            temp_ar[i] = a[i];
+            i++;
+        }
+    }
+    while ( j < len + 1){
+        a[j]=temp_ar[j];
+        j++;
+    }
+    free(temp_ar);
+}
+void thirdfunc (int *a, int *p_n , int *anew , int *toppnew, int *subnew, int *topnewnew )
+{
+    int j = 0,n = 0,b = 0;
+    anew = realloc(anew, 100 * sizeof(int));
+    *toppnew = b;
+    for (int i =0;i < *p_n-1; i++){
+        if (a[i]==a[i+1]){
+            if (a[i] == a[i+2]){
+                anew[j]=a[i];
+                j++;
+                b++;
+            }
+            if (a[i] != a[i+2]){
+                anew[j]=a[i];
+                anew[j+1]=a[i+1];
+                j = j + 2;
+                b = b + 2;
+            }
+        }
+
+    }
+    for(int k =1 ; k <= *p_n; k++){
+        if (a[k-1] != a[k-2]){
+            if ((a[k-1] != a[k]) && (k != *p_n )){
+                subnew[n] = a[k-1];
+                n++;
+            }
+            if ((k == *p_n )){
+                subnew[n] = a[k-1];
+                n++;
+            }
+        }
+    }
+    *topnewnew=n;
+    printf ("\nnew arr: \n");
+    for (int i = 0 ; i < *toppnew; i++){
+        if (i < *toppnew - 1){
+            printf ("%d, ", anew[i]);
+        }else{
+            printf ("%d", anew[i]);
+        }
+    }
+    printf ("\nстарый массив: \n");
+    for (int i = 0 ; i < n; i++){
+        if (i < n - 1){
+            printf ("%d, ", subnew[i]);
+        }else{
+            printf ("%d", subnew[i]);
+        }
+    }
+    printf("\n\n");
+}
+void fourthfunc (int *a ,int *p_head){
+    int i ;
+    for (i = 0 ; i < *p_head; i++){
+            printf ("%d ", a[i]);
+    }
+    printf("\n");
+}

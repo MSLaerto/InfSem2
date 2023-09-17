@@ -1,0 +1,16 @@
+#ifndef GRAPH_H
+#define GRAPH_H
+int addV(Graph **graph, char *name);
+int find(Graph **graph, char *name);
+int addE(Graph **graph, int from, int to, int mark);
+int showV(Graph **graph);
+int showE(Graph **graph);
+int delV(Graph **graph, char *name);
+int delE(Graph **graph, int from, int to);
+void graph(Graph **graph);
+void obxod(Graph **graph, int *visited, int ind);
+int way(Graph **graph, int from, int to);
+int kss(Graph **graph);
+int input(Graph **graph);
+#endif
+

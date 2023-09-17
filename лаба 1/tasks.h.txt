@@ -1,0 +1,17 @@
+typedef struct Line{
+    int n;
+    int *a;
+} Line;
+typedef struct Matrix{
+    int lines;
+    Line *matr;
+} Matrix;
+
+
+void output_test(const char *msg, Matrix a);
+int getInt(int *a);
+int input(Matrix *rm ,Matrix *rm_new );
+void erase(Matrix *a);
+void output(const char *msg, Matrix a);
+void min(int a[], int m ,int a_new[], int* m_new);
+void line_min(Matrix pm , Matrix pm_new);

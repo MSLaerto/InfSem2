@@ -1,0 +1,20 @@
+#ifndef TYPE_H
+#define TYPE_H
+typedef struct Edge Edge;
+typedef struct Node{
+    char *name;
+    int n;
+    Edge *arr_edge;
+} Node;
+typedef struct Edge{
+    int to;
+    int from;
+    int mark;
+} Edge;
+typedef struct Graph{
+    int size;
+    Node *vertexes;
+    int **matrix;
+} Graph;
+#endif
+

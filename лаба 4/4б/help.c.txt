@@ -1,0 +1,118 @@
+#include <stdio.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#define A 0.5
+#include "type.h"
+#include "help.h"
+#include "tree.h"
+char *getStr(){
+    char *ans = malloc(sizeof(char));
+    char n;
+    int len = 0;
+    n = getchar();
+    while(n != EOF && n != '\n'){
+        ans = realloc(ans, sizeof(char) * (len + 2));
+        ans[len] = n;
+        len += 1;
+        n = getchar();
+    }
+    ans[len] = '\0';
+    return ans;
+}
+int getInt(){
+    int n, a;
+    do{
+        n = scanf("%d", &a);
+        if (n < 0){
+            return 0;
+        }
+        if (n == 0 || a < 0){
+            printf("Введен некоректный символ, повторите попытку:\n");
+            scanf("%*[^\n]");
+            scanf("%*c");
+        }
+    }while(n == 0 || a < 0);
+    scanf("%*[^\n]");
+    scanf("%*c");
+    return a;
+}
+int menu_add(Tree **tree){
+    printf("Введите ключ по которому хотите добавить значение:");
+    char *key = getStr();
+    printf("Введите значение:");
+    int data = getInt();
+    Node *tmp = NULL;
+    int check = add(&tmp, &(*tree)->root, key, data, tree);
+    if (check == -1){
+        printf("Узел добавлен\n");
+    }
+    else{
+        printf("Такой ключ уже существует. Узел обновлен. Старое значение: %d\n", check);
+    }
+    free(key);
+    return 1;
+}
+int menu_del(Tree **tree){
+    printf("Введите ключ элемента, которого хотите удалить:\n");
+    char *key = getStr();
+    int check = del(&(*tree)->root, key, tree);
+    free(key);
+    if (check == -1){
+        printf("Такого элемента не существует\n");
+        return 1;
+    }
+    else{
+        return 1;
+    }
+}
+int menu_find(Tree **tree){
+    printf("Введите ключ элемента, которого хотите найти:\n");
+    char *key = getStr();
+    Node *tmp = find(&(*tree)->root, key);
+    if (tmp == NULL){
+        printf("Такого элемента не существует\n");
+        free(key);
+        return 1;
+    }
+    printf("%s", tmp->key);
+    free(key);
+    return 1;
+}
+int menu_max_find(Tree **tree){
+    printf("Введите границу:\n");
+    char *n = getStr();
+    Node *tmp = find_max(&(*tree)->root, n);
+    printf("%s %d\n", tmp->key, tmp->info->data);
+    return 1;
+}
+int menu_obxod(Tree **tree){
+    int check = obxod(&(*tree)->root);
+    printf("\n");
+    if (check){
+        return 1;
+    }
+    return 0;
+}
+int show1(Tree **tree) {
+    show2((*tree)->root, 0);
+    return 1;
+}
+int menu(){
+    const char *msg[] = {"0. Quit", "1. Show", "2. Add", "3. Delete", "4. Find", "5. Max", "6. Obxod", "7. File", "8. Full"};
+    const int msg_count = sizeof(msg) / sizeof(msg[0]);
+    int n;
+    for (int i = 0; i < msg_count; i++){
+        printf("%s\n", msg[i]);
+    }
+    printf("Введите значение:\n");
+    do{
+        n = getInt();
+        if (n < msg_count && n >= 0){
+            return n;
+        }
+        printf("Введено некоректное число. Повторите попытку.\n");
+    } while(n >= msg_count);
+}
+

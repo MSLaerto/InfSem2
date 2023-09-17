@@ -1,0 +1,7 @@
+#ifndef FUNC_H
+#define FUNC_H
+void firstfunc (int *a, const int *b);
+void secondfunc(int*a,int *p_head,int delete_el);
+void thirdfunc (int *a, int *p_n , int *anew , int *toppnew, int *subnew, int *topnewnew );
+void fourthfunc (int *a ,int *p_head);
+#endif

@@ -1,0 +1,30 @@
+#include <stdio.h>
+#include <math.h>
+void func (float x, float eps, float *s, int *i)
+{
+    *s=x;
+    *i=2;
+    float p=x;
+    while(fabs (p*(-3)) >= eps){
+        p=p*x*((*i)-1)/(*i);
+        if((*i)%4==0){
+            *s=*s+p*(-3);
+        }
+        if ((*i)%4!=0){
+            *s=*s+p;
+        }
+        *i =*i + 1 ;
+    }
+}
+int main ()
+{
+    int i;
+    float eps, s ;
+    printf ("Enter parameter ");
+    float x = scanf ("%f", &x);
+    printf ("Enter inaccuracy ");
+    scanf ("%f", &eps);
+    func (x, eps, &s , &i);
+    printf("math.h answer = %.20f \n and my answer = %.20f\n", log(1+x+x*x+x*x*x) , s);
+    printf("iterations number %d",i);
+}

@@ -1,0 +1,11 @@
+tree:
+        gcc -w -c -g tree.c
+        gcc -w -c -g help.c
+        gcc -w -c -g main.c
+        ar cr libtree.a tree.o
+        gcc -w main.o help.o tree.o -o a.out -L. -ltree
+        valgrind ./a.out
+clean:
+        rm *.o
+        rm *.a
+        rm a.out

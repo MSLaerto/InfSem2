@@ -1,0 +1,12 @@
+#ifndef HELP_H
+#define HELP_H
+char getStr();
+int getInt();
+int show1(Node root);
+int menu();
+int menu_add(Node root);
+int menu_del(Node root);
+int menu_find(Node root);
+int menu_min_find(Node root);
+int menu_obxod(Node root);
+#endif

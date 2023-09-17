@@ -1,0 +1,22 @@
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "type.h"
+#include "table.h"
+#include "menu.h"
+int main() {
+    Table board = {0, 0, NULL};
+    menu_load(&board);
+    int num_func;
+    int (*fptr[])(Table *) = {NULL, menu_add, menu_find, menu_delete, CleanShow, DirtyShow, Reorg, input};
+    while(num_func = menu()){
+        if (!fptr[num_func](&board)){
+            break;
+        }
+    }
+    save(&board);
+    /*clear(&board);*/
+    printf("END");
+    return 0;
+}

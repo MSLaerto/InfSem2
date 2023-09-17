@@ -1,0 +1,15 @@
+
+#ifndef TABLE_H
+#define TABLE_H
+int count_rel(Table *board, char *key1);
+int DirtyShow(Table *board);
+int CleanShow(Table *board);
+int Reorg(Table *board);
+int add(Table *board, char *key, int data);
+int input(Table *board);
+int del(Table *board, char *key1, int rel);
+void create(Table *board, char *fname, int ms);
+int load(Table *board, char *fname);
+int find(Table *board, int *n, int **info, char *key1);
+void save(Table *board);
+#endif

@@ -1,0 +1,208 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "type.h"
+#include "help.h"
+#include "graph.h"
+char *getStr(){
+    char *ans = malloc(sizeof(char));
+    char n;
+    int len = 0;
+    n = getchar();
+    while(n != EOF && n != '\n'){
+        ans = realloc(ans, sizeof(char) * (len + 2));
+        ans[len] = n;
+        len += 1;
+        n = getchar();
+    }
+    ans[len] = '\0';
+    return ans;
+}
+int getInt(){
+    int n, a;
+    do{
+        n = scanf("%d", &a);
+        if (n < 0){
+            return 0;
+        }
+        if (n == 0){
+            printf("Введен некоректный символ, повторите попытку:\n");
+            scanf("%*[^\n]");
+            scanf("%*c");
+        }
+    }while(n == 0);
+    scanf("%*[^\n]");
+    scanf("%*c");
+    return a;
+}
+int menu(){
+    const char *msg[] = {"0. Quit", "1. Show", "2. Add vertex", "3. Add edge", "4. Del vertex", "5. Del edge", "6. Edit vertex", "7. Edit edge", "8. Obxod", "9. Way", "10. Kss", "11. File"};
+    const int msg_count = sizeof(msg) / sizeof(msg[0]);
+    int n;
+    for (int i = 0; i < msg_count; i++){
+        printf("%s\n", msg[i]);
+    }
+    printf("Введите значение:\n");
+    do{
+        n = getInt();
+        if (n < msg_count && n >= 0){
+            return n;
+        }
+        printf("Введено некоректное число. Повторите попытку.\n");
+    } while(n >= msg_count);
+}
+int menu_show(Graph **graph){
+     printf("1 - Матрица смежности.\n2 - Список смежности.\n");
+     int k = getInt();
+     if (k == 1){
+        showV(graph);
+     }
+     if ( k == 2){
+        showE(graph);
+     }
+     return 1;
+}
+int menu_addV(Graph **graph){
+    printf("Введите имя человека:\n");
+    char *name = getStr();
+    if (find(graph, name) != -1){
+        free(name);
+        return 1;
+    }
+    int check = addV(graph, name);
+    if (check == 1){
+        printf("Вершина добавлена\n");
+    }
+    else{
+        printf("Такой ключ уже существует. Узел обновлен. Старое значение: %d\n", check);
+    }
+    free(name);
+    return 1;
+}
+int menu_obxod(Graph **graph){
+    printf("Введите имя человека:\n");
+    char *name = getStr();
+    int ind = find(graph, name);
+    if (ind == -1){
+        free(name);
+        return 1;
+    }
+    int *visited = calloc((*graph)->size, sizeof(int));
+    obxod(graph, visited, ind);
+    free(visited);
+    free(name);
+    return 1;
+}
+int menu_addE(Graph **graph){
+    printf("Введите из какой вершины ребро:\n");
+    char *name1 = getStr();
+    printf("Введите из в какую вершину ребро:\n");
+    char *name2 = getStr();
+    printf("Введите оценку уровня отношения:\n");
+    int mark = getInt();
+    int from = find(graph, name1);
+    int to = find(graph, name2);
+    if (!(from != -1 && to != -1)){
+        free(name1);
+        free(name2);
+        return 1;
+    }
+    int check = addE(graph, from, to, mark);
+    if (check == 1){
+        printf("Ребро добавлено\n");
+    }
+    else{
+        printf("Такой ключ уже существует. Узел обновлен. Старое значение: %d\n", check);
+    }
+    free(name1);
+    free(name2);
+    return 1;
+}
+int menu_delV(Graph **graph){
+    printf("Введите вершину, которую хотите удалить: \n");
+    char *name = getStr();
+    if (find(graph, name) == -1){
+        free(name);
+        return 1;
+    }
+    delV(graph, name);
+    free(name);
+    return 1;
+}
+int menu_delE(Graph **graph){
+    printf("Введите из какой вершины, вы хотите удалить ребро: \n");
+    char *name1 = getStr();
+    printf("Введите вершину, в которую идет ребро: \n");
+    char *name2 = getStr();
+    int from = find(graph, name1);
+    int to = find(graph, name2);
+    if (from == -1 || to == -1){
+        free(name1);
+        free(name2);
+        return 1;
+    }
+    delE(graph, from, to);
+    free(name1);
+    free(name2);
+    return 1;
+}
+int menu_editV(Graph **graph){
+    printf("Введите вершину, которую хотите отредактировать:\n");
+    char *name = getStr();
+    if (find(graph, name) == -1){
+        free(name);
+        return 1;
+    }
+    printf("Введите новое имя:\n");
+    char *name2 = getStr();
+    int ind = find(graph, name);
+    free((*graph)->vertexes[ind].name);
+    (*graph)->vertexes[ind].name = strdup(name2);
+    free(name);
+    free(name2);
+    return 1;
+}
+int menu_editE(Graph **graph){
+    printf("Введите вершину, из которой выходит ребро, которое хотите отредактировать:\n");
+    char *name1 = getStr();
+    printf("Введите вершину, в которую входит ребро, которое хотите отредактировать:\n");
+    char *name2 = getStr();
+    if (find(graph, name1) == -1 || find(graph, name2) == -1){
+        free(name1);
+        free(name2);
+        return 1;
+    }
+    printf("Введите новую оценку уровня отношения к человеку:\n");
+    int mark = getInt();
+    int ind1 = find(graph, name1);
+    int ind2 = find(graph, name2);
+    for(int i = 0; i < (*graph)->vertexes[ind1].n; i++){
+        if ((*graph)->vertexes[ind1].arr_edge[i].to == ind2){
+            (*graph)->vertexes[ind1].arr_edge[i].mark = mark;
+            break;
+        }
+    }
+    free(name1);
+    free(name2);
+    return 1;
+}
+int menu_way(Graph **graph){
+    printf("Введите от какой вершины вести поиск: \n");
+    char *name1= getStr();
+    printf("Введите до какой вершины вести поиск: \n");
+    char *name2 = getStr();
+    int from = find(graph, name1);
+    int to = find(graph, name2);
+    if (from == -1 || to == -1){
+        free(name1);
+        free(name2);
+        return 1;
+    }
+    int k = way(graph, from, to);
+    if (k == 0){
+        printf("Такого пути не существует\n");
+    }
+    free(name1);
+    free(name2);
+    return 1;
+}

@@ -1,0 +1,326 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "type.h"
+#include "help.h"
+#include "graph.h"
+int addV(Graph **graph, char *name){
+    (*graph)->vertexes = realloc((*graph)->vertexes, sizeof(Node) * ((*graph)->size + 1));
+    (*graph)->vertexes[(*graph)->size].n=0;
+    (*graph)->vertexes[(*graph)->size].arr_edge = malloc(sizeof(Edge));
+    (*graph)->vertexes[(*graph)->size].name = strdup(name);
+    (*graph)->matrix = realloc((*graph)->matrix, sizeof(int*) * ((*graph)->size + 1));
+    for (int i = 0; i < (*graph)->size; i++){
+        (*graph)->matrix[i] = realloc((*graph)->matrix[i], sizeof(int) * ((*graph)->size + 1));
+        (*graph)->matrix[i][(*graph)->size] = 0;
+    }
+    (*graph)->matrix[(*graph)->size] = malloc(sizeof(int) * ((*graph)->size + 1));
+    for (int i = 0; i < (*graph)->size+1; i++){
+        (*graph)->matrix[(*graph)->size][i] = 0;
+    }
+    (*graph)->size += 1;
+    return 1;
+}
+int find(Graph **graph, char *name){
+    for (int i = 0; i < (*graph)->size; i++){
+        if (strcmp((*graph)->vertexes[i].name, name) == 0){
+            return i;
+        }
+    }
+    return -1;
+}
+int addE(Graph **graph, int from, int to, int mark){
+    (*graph)->vertexes[from].arr_edge = realloc((*graph)->vertexes[from].arr_edge, sizeof(Edge) * ((*graph)->vertexes[from].n + 1));
+    (*graph)->vertexes[from].arr_edge[(*graph)->vertexes[from].n].from = from;
+    (*graph)->vertexes[from].arr_edge[(*graph)->vertexes[from].n].to = to;
+    (*graph)->vertexes[from].arr_edge[(*graph)->vertexes[from].n].mark = mark;
+    (*graph)->vertexes[from].n += 1;
+    (*graph)->vertexes[to].arr_edge = realloc((*graph)->vertexes[to].arr_edge, sizeof(Edge) * ((*graph)->vertexes[to].n + 1));
+    (*graph)->vertexes[to].arr_edge[(*graph)->vertexes[to].n].from = from;
+    (*graph)->vertexes[to].arr_edge[(*graph)->vertexes[to].n].to = to;
+    (*graph)->vertexes[to].arr_edge[(*graph)->vertexes[to].n].mark = mark;
+    (*graph)->vertexes[to].n += 1;
+    (*graph)->matrix[from][to] = 1;
+    return 1;
+}
+int showV(Graph **graph) {
+    printf("  ");
+    for (int i = 0; i < (*graph)->size; i++){
+        printf("%s ", (*graph)->vertexes[i].name);
+    }
+    printf("\n");
+    for (int i = 0; i < (*graph)->size; i++){
+        printf("%s ", (*graph)->vertexes[i].name);
+        for (int j = 0; j < (*graph)->size; j++){
+            printf("%d ", (*graph)->matrix[i][j]);
+        }
+        printf("\n");
+    }
+    return 1;
+}
+int showE(Graph **graph){
+    for(int i = 0; i < (*graph)->size; i++){
+        printf("%s-->", (*graph)->vertexes[i].name);
+        for (int j = 0; j < (*graph)->vertexes[i].n; j++){
+            if ((*graph)->vertexes[i].arr_edge[j].from == i){
+                 printf("%s-->", (*graph)->vertexes[(*graph)->vertexes[i].arr_edge[j].to].name);
+            }
+        }
+        printf("0\n");
+    }
+    return 1;
+}
+int delV(Graph **graph, char *name){
+    int ind = find(graph, name);
+    for (int i = 0; i <(*graph)->size; i++){
+        for(int j = 0; j < (*graph)->vertexes[i].n; j++){
+            if (((*graph)->vertexes[i].arr_edge[j].to == ind || (*graph)->vertexes[i].arr_edge[j].from == ind)){
+                for(int k = j; k < (*graph)->vertexes[i].n - 1; k ++){
+                    (*graph)->vertexes[i].arr_edge[k] = (*graph)->vertexes[i].arr_edge[k+1];
+                }
+                (*graph)->vertexes[i].arr_edge = realloc((*graph)->vertexes[i].arr_edge, sizeof(Edge) * ((*graph)->vertexes[i].n - 1));
+                (*graph)->vertexes[i].n -= 1;
+            }
+        }
+    }
+    free((*graph)->vertexes[ind].name);
+    free((*graph)->vertexes[ind].arr_edge);
+    for (int i = ind; i <(*graph)->size-1; i++){
+        (*graph)->vertexes[i] = (*graph)->vertexes[i+1];
+    }
+    (*graph)->vertexes = realloc((*graph)->vertexes, sizeof(Node) * ((*graph)->size - 1));
+    for (int i = 0; i <(*graph)->size; i++){
+        for(int j = ind; j < (*graph)->size-1; j++){
+            (*graph)->matrix[i][j] = (*graph)->matrix[i][j + 1];
+        }
+        (*graph)->matrix[i] = realloc((*graph)->matrix[i], sizeof(int) * ((*graph)->size - 1));
+    }
+    for (int i = ind; i <(*graph)->size-1; i++){
+        (*graph)->matrix[i] = (*graph)->matrix[i+1];
+    }
+    (*graph)->matrix = realloc((*graph)->matrix, sizeof(int*) * ((*graph)->size - 1));
+    (*graph)->size -= 1;
+    return 1;
+}
+int delE(Graph **graph, int from, int to){
+    for(int i = 0; i < (*graph)->vertexes[from].n; i++){
+        if ((*graph)->vertexes[from].arr_edge[i].to == to){
+            for (int j = i; j < (*graph)->vertexes[from].n - 1; j++){
+                (*graph)->vertexes[from].arr_edge[j] = (*graph)->vertexes[from].arr_edge[j+1];
+            }
+            (*graph)->vertexes[from].arr_edge = realloc((*graph)->vertexes[from].arr_edge, sizeof(Edge) * ((*graph)->vertexes[from].n - 1));
+            (*graph)->vertexes[from].n -= 1;
+        }
+    }
+    (*graph)->matrix[from][to] = 0;
+    return 1;
+}
+void clear(Graph **graph){
+    for (int i = 0; i < (*graph)->size; i++){
+        free((*graph)->vertexes[i].arr_edge);
+        free((*graph)->vertexes[i].name);
+        free((*graph)->matrix[i]);
+    }
+    free((*graph)->vertexes);
+    free((*graph)->matrix);
+    free(*graph);
+}
+int findE(Graph **graph, int from, int to){
+    for (int i = 0; i < (*graph)->vertexes[from].n; i++){
+        if ((*graph)->vertexes[from].arr_edge[i].to == to){
+            return (*graph)->vertexes[from].arr_edge[i].mark;
+        }
+    }
+    return 11;
+}
+void obxod(Graph **graph, int *visited, int ind){
+    visited[ind] = 1;
+    printf("%s \n", (*graph)->vertexes[ind].name);
+    for (int i = 0; i < (*graph)->size; i++){
+        if ((*graph)->matrix[ind][i] == 1 && visited[i] == 0 && findE(graph, ind, i) > 0  && findE(graph, ind, i) <= 10){
+             obxod(graph, visited, i);
+        }
+    }
+}
+int way(Graph **graph, int from, int to){
+    int *visited = calloc((*graph)->size, sizeof(int));
+    int *min_arr = calloc((*graph)->size, sizeof(int));
+    for (int i = 0; i < (*graph)->size; i++){
+        min_arr[i] = (*graph)->size + 1;
+    }
+    min_arr[0] = 0;
+    int ind;
+    do{
+        ind = (*graph)->size;
+        int min = (*graph)->size;
+        for(int i = 0; i < (*graph)->size; i++){
+            if (visited[i] == 0 && min_arr[i] < min){
+                min = min_arr[i];
+                ind = i;
+            }
+        }
+        if (ind != (*graph)->size){
+            for (int i = 0; i < (*graph)->size; i++){
+                int t = -1;
+                for (int j = 0; j < (*graph)->vertexes[ind].n; j++){
+                        if ((*graph)->vertexes[ind].arr_edge[j].to == i){
+                            t = (*graph)->vertexes[ind].arr_edge[j].mark;
+                            break;
+                        }
+                }
+                if ((*graph)->matrix[ind][i] == 1 && t >= 0){
+                    int tmp = min + (*graph)->matrix[ind][i];
+                    if (tmp < min_arr[i]){
+                        min_arr[i] = tmp;
+                    }
+                }
+            }
+            visited[ind] = 1;
+        }
+    } while(ind < (*graph)->size);
+    int weight = min_arr[to], k = 1, l = 0;
+    int *way = malloc(sizeof(int) * (*graph)->size);
+    way[0] = to + 1;
+    while (to != from && l <= (*graph)->size){
+        for (int i = 0; i < (*graph)->size; i++){
+            if ((*graph)->matrix[i][to] != 0){
+                int tmp = weight - (*graph)->matrix[i][to];
+                if (tmp == min_arr[i]){
+                    weight = tmp;
+                    to = i;
+                    way[k] = i + 1;
+                    k += 1;
+                }
+            }
+        }
+        l += 1;
+    }
+    if (l > (*graph)->size){
+        printf("Такого пути нет.\n");
+        free(min_arr);
+        free(visited);
+        free(way);
+        return 1;
+    }
+    printf("Искомые люди:");
+    for (int i = k - 1; i >= 0; i--){
+        printf("%d ", way[i]);
+    }
+    printf("\n");
+    free(min_arr);
+    free(visited);
+    free(way);
+    return 1;
+}
+void dfs1(Graph **graph, int i, int *visited, int *f, int *len_f){
+    visited[i] = 1;
+    for (int j = 0; j < (*graph)->size; ++j){
+        if (visited[j] == 0 && (*graph)->matrix[i][j] == 1 && findE(graph, i, j) > 0  && findE(graph, i, j) <= 10){
+            dfs1(graph, j, visited, f, len_f);
+        }
+    }
+    f[(*len_f)] = i;
+    (*len_f) += 1;
+}
+void dfs2(Graph **graph, int v, int *visited, int **matrixT, int *components, int *len_c){
+    visited[v] = 1;
+    components[*len_c] = v;
+    (*len_c) += 1;
+    for (int i = 0; i < (*graph)->size; ++i){
+        if (visited[i] == 0 && matrixT[v][i] == 1 && findE(graph, i, v) > 0  && findE(graph, i, v) <= 10){
+            dfs2(graph, i, visited, matrixT, components, len_c);
+        }
+    }
+}
+int kss(Graph **graph){
+    int **matrixT = malloc(sizeof(int*) * (*graph)->size);
+    int *visited = calloc((*graph)->size, sizeof(int));
+    int *f = malloc(sizeof(int)*(*graph)->size);
+    int *components = malloc(sizeof(int) * (*graph)->size);
+    int len_f = 0, len_c = 0, len_m = 0, len_T = 0;
+    for (int i = 0; i < (*graph)->size; ++i){
+        matrixT[i] = malloc(sizeof(int) * (*graph)->size);
+    }
+    for (int i = 0; i < (*graph)->size; i++){
+        for (int j = 0; j < (*graph)->size; j++){
+            matrixT[i][j] = (*graph)->matrix[j][i];
+        }
+    }
+    for (int i = 0; i <(*graph)->size; ++i){
+        if (visited[i] == 0){
+            dfs1(graph, i, visited, f, &len_f);
+        }
+    }
+    for (int i = 0; i < (*graph)->size; i++){
+        visited[i] = 0;
+    }
+    for (int i = 0; i < (*graph)->size; ++i){
+        int v = f[(*graph)->size-1-i];
+        if (visited[v] == 0){
+            dfs2(graph, v, visited, matrixT, components, &len_c);
+            for (int j = 0; j < len_c; j++){
+                printf("%s ", (*graph)->vertexes[components[j]].name);
+            }
+            len_c = 0;
+            printf("\n");
+        }
+    }
+    free(visited);
+    for (int i = 0; i < (*graph)->size; i++){
+        free(matrixT[i]);
+    }
+    free(matrixT);
+    free(f);
+    free(components);
+}
+int input(Graph **graph){
+    FILE *vertex;
+    int len = 0;
+    char *st = getStr();
+    vertex = fopen(st, "r");
+    while (!feof(vertex)){
+        char buf[1] = {0}, *res;
+        int f = 1, str_len = 0;
+        res = malloc(sizeof(char));
+        while(f == 1){
+            int buflen = 0;
+            fscanf(vertex, "%1[^\n]%n", buf, &buflen);
+            if (buflen == 1){
+                res = realloc(res, sizeof(char) * (str_len + 2));
+                res[str_len] = buf[0];
+                str_len += 1;
+            }
+            else{
+                f = 0;
+            }
+        }
+        if (str_len == 0){
+            free(res);
+        }
+        else{
+            res[str_len] = '\0';
+            addV(graph, res);
+            free(res);
+        }
+        fscanf(vertex, "%*1[\n]");
+    }
+    free(st);
+    fclose(vertex);
+    FILE *edge;
+    len = 0;
+    st = getStr();
+    edge = fopen(st, "r");
+    while (!feof(edge)){
+        int from, to, mark;
+        fscanf(edge, "%*1[\n]");
+        fscanf(edge, "%d", &from);
+        fscanf(edge, "%*1[\n]");
+        fscanf(edge, "%d", &to);
+        fscanf(edge, "%*1[\n]");
+        fscanf(edge, "%d", &mark);
+        addE(graph, from, to, mark);
+    }
+    free(st);
+    fclose(edge);
+    return 1;
+}

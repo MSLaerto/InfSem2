@@ -1,0 +1,10 @@
+#ifndef MENU_H
+#define MENU_H
+char *getStr();
+int getInt();
+int menu();
+int menu_add(Table *board);
+int menu_delete(Table *board);
+int menu_find(Table *board);
+int menu_load(Table *board);
+#endif

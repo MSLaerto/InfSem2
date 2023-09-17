@@ -1,0 +1,113 @@
+int main()
+{
+    int *arr;
+    arr = (int*)malloc(100*sizeof(int));
+    int *subarr;
+    subarr= (int*)malloc(100*sizeof(int));
+    int *subnew;
+    subnew = (int*)malloc(100 * sizeof(int));
+    int head = 0 ,df, n =0,headnew=0 , thirdfuncchecker =0;
+    printf("Enter the number of elements: ");
+    int proverka1 = scanf ("%d",&n);
+    while(proverka1 != 1){
+        printf("Enter a valid value: ");
+        scanf ("%*[^\n]");
+        scanf ("%*c");
+        proverka1 = scanf ("%d", &arr[head]);
+    }
+    for (head ; head <n ; head ++){
+        printf("%d number: ",(head+1));
+        int sk = scanf("%d", &arr[head]);
+        while (sk != 1){
+            printf("Enter a valid value starting at the %d element: ", (head+1));
+            scanf ("%*[^\n]");
+            scanf ("%*c");
+            sk = scanf ("%d", &arr[head]);
+        }
+    }
+    if (df == 0){
+        return 0;
+    }
+    int prov_ans ,ans = 6 ;
+    while (ans !=0){
+        if (thirdfuncchecker == 0){
+            printf ("What would you like?\n");
+            printf ("1 - add element\n");
+            printf ("2 - remove element\n");
+            printf ("3 - do task\n");
+            printf ("4 - print array\n");
+            printf ("0 - exit\n");
+            prov_ans = scanf ("%d", &ans);
+            while (prov_ans !=1){
+                printf("Enter a valid value: ");
+                scanf ("%*[^\n]");
+                scanf ("%*c");
+                prov_ans = scanf ("%d", &ans);
+            }
+            if ((ans != 0) && (ans !=1) && (ans != 2) && (ans != 3) && (ans != 4) && (ans != 5)){
+                printf("Incorrect command!!! \n");
+            }
+            if (ans == 1){
+                firstfunc(arr,&head);
+            }
+            if (ans == 2){
+                int delete_el, *p_head = &head;
+                printf("Enter a number of del element: ");
+                int secondf_prov = scanf("%d", &delete_el);
+                while (secondf_prov != 1){
+                    printf("Enter a valid value: ");
+                    scanf ("%*[^\n]");
+                    scanf ("%*c");
+                    secondf_prov = scanf ("%d", &delete_el);
+                }
+                secondfunc(arr,p_head,delete_el);
+            }
+            if (ans == 3){
+                thirdfunc(arr,&n,subarr,&head,subnew,&headnew);
+                thirdfuncchecker = 1;
+            }
+            if (ans == 4){
+                fourthfunc(arr,&head);
+            }
+        }
+        if (thirdfuncchecker == 1){
+            printf ("What would you like?\n");
+            printf ("1 - add element\n");
+            printf ("2 - remove element\n");
+            printf ("3 - do task\n");
+            printf ("4 - print new array\n");
+            printf ("5 - print old array\n");
+            printf ("0 - exit\n");
+            prov_ans = scanf ("%d", &ans);
+            while (prov_ans !=1){
+                printf("Enter a valid value: ");
+                scanf ("%*[^\n]");
+                scanf ("%*c");
+                prov_ans = scanf ("%d", &ans);
+            }
+            if (ans == 1){
+                firstfunc(arr,&head);
+            }
+            if (ans == 4){
+                fourthfunc(arr,&head);
+                head++;
+            }
+            if (ans == 2){
+                int c, *p_head = &head;
+                printf("Enter a number of del element: ");
+                int secondf_prov = scanf("%d", &c);
+                while (secondf_prov != 1){
+                    printf("Enter a valid value: ");
+                    scanf ("%*[^\n]");
+                    scanf ("%*c");
+                    secondf_prov = scanf ("%d", &c);
+                }
+                secondfunc(arr,p_head,c);
+            }
+        }
+        if ((ans == 5) && (thirdfuncchecker == 1)){
+            fourthfunc(subnew, &headnew);
+        }
+    }
+    free(arr);
+}

@@ -1,0 +1,117 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include "type.h"
+#include "tree.h"
+#include "help.h"
+char *getStr(){
+    char *ans = malloc(sizeof(char));
+    char n;
+    int len = 0;
+    n = getchar();
+    while(n != EOF && n != '\n'){
+        ans = realloc(ans, sizeof(char) * (len + 2));
+        ans[len] = n;
+        len += 1;
+        n = getchar();
+    }
+    ans[len] = '\0';
+    return ans;
+}
+int getInt(){
+    int n, a;
+    do{
+        n = scanf("%d", &a);
+        if (n < 0){
+            return 0;
+        }
+        if (n == 0 || a < 0){
+            printf("Введен некоректный символ, повторите попытку:\n");
+            scanf("%*[^\n]");
+            scanf("%*c");
+        }
+    }while(n == 0 || a < 0);
+    scanf("%*[^\n]");
+    scanf("%*c");
+    return a;
+}
+int show1(Node **root) {
+    show2(*root, 0);
+    return 1;
+}
+int menu(){
+    const char *msg[] = {"0. Quit", "1. Show", "2. Add", "3. Delete", "4. Find", "5. Min", "6. Obxod", "7. File", "8. Full"};
+    const int msg_count = sizeof(msg) / sizeof(msg[0]);
+    int n;
+    for (int i = 0; i < msg_count; i++){
+        printf("%s\n", msg[i]);
+    }
+    printf("Введите значение:\n");
+    do{
+        n = getInt();
+        if (n < msg_count && n >= 0){
+            return n;
+        }
+        printf("Введено некоректное число. Повторите попытку.\n");
+    } while(n >= msg_count);
+}
+int menu_add(Node **root){
+    printf("Введите ключ по которому хотите добавить значение:");
+    char *key = getStr();
+    printf("Введите значение:");
+    int data = getInt();
+    Node *x = malloc(sizeof(Node));
+    x->key = key;
+    x->info = malloc(sizeof(Info));
+    x->info->data = data;
+    x->left = NULL;
+    x->right = NULL;
+    int check = add(root, x);
+    if (check == -1){
+        printf("Узел добавлен\n");
+    }
+    else{
+        printf("Такой ключ уже существует. Узел обновлен. Старое значение: %d\n", check);
+    }
+    return 1;
+}
+int menu_del(Node **root){
+    printf("Введите ключ элемента, которого хотите удалить:\n");
+    char *key = getStr();
+    int check = del(root, key);
+    free(key);
+    if (check == 0){
+        printf("Такого элемента не существует\n");
+        return 1;
+    }
+    else{
+        return 1;
+    }
+}
+int menu_find(Node **root){
+    printf("Введите ключ элемента, которого хотите найти:\n");
+    char *key = getStr();
+    Node *tmp = find(root, key);
+    if (tmp == NULL){
+        printf("Такого элемента не существует\n");
+        free(key);
+        return 1;
+    }
+    printf("%s", tmp->key);
+    free(key);
+    return 1;
+}
+int menu_min_find(Node **root){
+    Node *tmp = find_min(root);
+    printf("%s %d\n", tmp->key, tmp->info->data);
+    return 1;
+}
+int menu_obxod(Node **root){
+    int check = obxod(root);
+    printf("\n");
+    if (check){
+        return 1;
+    }
+    return 0;
+}

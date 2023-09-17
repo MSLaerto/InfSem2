@@ -1,0 +1,17 @@
+#ifndef TYPE_H
+#define TYPE_H
+#define A 0.5
+typedef struct Info{
+    unsigned int data;
+} Info;
+typedef struct Node{
+    Info *info;
+    char *key;
+    struct Node *left;
+    struct Node *right;
+    struct Node *par;
+} Node;
+typedef struct Tree{
+    Node *root;
+} Tree;
+#endif

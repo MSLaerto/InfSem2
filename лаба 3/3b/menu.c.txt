@@ -1,0 +1,112 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "type.h"
+#include "menu.h"
+#include "table.h"
+char *getStr(){
+    char *ans = malloc(sizeof(char));
+    char n;
+    int len = 0;
+    n = getchar();
+    while(n != EOF && n != '\n'){
+        ans = realloc(ans, sizeof(char) * (len + 2));
+        ans[len] = n;
+        len += 1;
+        n = getchar();
+    }
+    ans[len] = '\0';
+    return ans;
+}
+int getInt(){
+    int n, a;
+    do{
+        n = scanf("%d", &a);
+        if (n < 0){
+            return 0;
+        }
+        if (n == 0 || a < 0){
+            printf("Введен некоректный символ, повторите попытку:\n");
+            scanf("%*[^\n]");
+            scanf("%*c");
+        }
+    }while(n == 0 || a < 0);
+    scanf("%*[^\n]");
+    scanf("%*c");
+    return a;
+}
+int menu(){
+    const char *msg[] = {"0. Quit", "1. Add", "2. Find", "3. Delete", "4. Clean Show", "5. Dirty Show", "6. Reorg", "7. File"};
+    const int msg_count = sizeof(msg) / sizeof(msg[0]);
+    int n;
+    for (int i = 0; i < msg_count; i++){
+        printf("%s\n", msg[i]);
+    }
+    printf("Введите значение:\n");
+    do{
+        n = getInt();
+        if (n < msg_count && n >= 0){
+            return n;
+        }
+        printf("Введено некоректное число. Повторите попытку.\n");
+    } while(n >= msg_count);
+}
+int menu_add(Table *board){
+    if (board->msize <= board->csize){
+        printf("Таблица заполнена. Попробуйте Reorg.\n");
+        return 1;
+    }
+    printf("Введите ключ элемента:\n");
+    char *key = getStr();
+    printf("Введите элемент:\n");
+    int el = getInt();
+    if (add(board, key, el) == 0){
+        printf("Таблица заполнена\n");
+    }
+    free(key);
+    return 1;
+}
+int menu_delete(Table *board){
+    printf("Введите удаляемый элемент:\n");
+    char *key = getStr();
+    int r = count_rel(board, key);
+    printf("Какую версию элемента вы хотите удалить? 0 - все: \n");
+    int rel = getInt();
+    if (r == 0){
+        printf("Такого элемента нет\n");
+        return 1;
+    }
+    del(board, key, rel);
+    free(key);
+    return 1;
+}
+int menu_find(Table *board){
+    printf("Введите ключ элемента, которого хотите найти: \n");
+    char *key = getStr();
+    int n = 0;
+    int *info = malloc(sizeof(int) * 4);
+    find(board, &n, &info, key);
+    if (n == 0){
+        printf("Такого элемента не существует\n");
+    }
+    else{
+        for (int i = 0; i < n; i++){
+            printf("busy: %d rel: %d len: %d key: %s data: %d\n", info[i * 4], info[i * 4 + 1], info[i * 4 + 2], key, info[i * 4 + 3]);
+        }
+    }
+    free(info);
+    free(key);
+    return 1;
+}
+int menu_load(Table *board){
+    char *fname = NULL;
+    printf("Введите название файла: \n");
+    fname = getStr();
+    if (load(board, fname) == 0){
+        printf("Введите максимальный размер таблицы:\n");
+        int ms = getInt();
+        create(board, fname, ms);
+    }
+    free(fname);
+    return 1;
+}

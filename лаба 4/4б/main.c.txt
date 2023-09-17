@@ -1,0 +1,28 @@
+#include <stdio.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#define A 0.5
+#include "type.h"
+#include "tree.h"
+#include "help.h"
+int main() {
+    Tree *tree = malloc(sizeof(Tree));
+    tree->root = NULL;
+    int num_func;
+    int (*fptr[])(Tree **) = {NULL, show1, menu_add, menu_del, menu_find, menu_max_find, menu_obxod, input, full};
+    while(num_func = menu()){
+        clock_t before = clock();
+        if (!fptr[num_func](&tree)){
+            break;
+        }
+        clock_t difference = clock() - before;
+        double msec = difference * 1000 / CLOCKS_PER_SEC;
+        printf("Time taken %f milliseconds\n", msec);
+    }
+    clear(&(tree)->root);
+    free(tree);
+    printf("END");
+    return 0;
+}

@@ -1,0 +1,247 @@
+#include <stdio.h>
+#include <getopt.h>
+#include <stdlib.h>
+#include <string.h>
+struct voter {
+    char *name;
+    char number[8];
+    int age;
+};
+int comp(const void *a, const void *b) {
+    const struct voter *r1 = a;
+    const struct voter *r2 = b;
+    return r1->age - r2->age;
+}
+int comp2(const void *a, const void *b) {
+    const struct voter *r1 = a;
+    const struct voter *r2 = b;
+    return strcmp(r1->name,r2->name);
+}
+int comp3(const void *a, const void *b) {
+    const struct voter *r1 = a;
+    const struct voter *r2 = b;
+    return strcmp(r1->number,r2->number);
+}
+void input1(int n1, struct voter **base){
+    int len = 0;
+    char *name;
+    name = malloc(sizeof(char));
+    (*base) = (struct voter *)malloc(sizeof(struct voter) * n1);
+    while(n1 > 0){
+        int k = (rand()%20 + 1);
+        char num[8];
+        name = realloc(name, sizeof(char) * (k + 1));
+        for (int i = 0; i < k; i++) name[i] = (rand() % 26 + 'a');
+        name[k] = '\0';
+        (*base)[len].name = name;
+        for (int i = 0; i < 3; i++) (*base)[len].number[i] = (rand()%26 + 'a');
+        (*base)[len].number[3] = '-';
+        for (int i = 4; i < 7; i++) (*base)[len].number[i] = (rand()%10 + '0');
+        (*base)[len].number[7] = '\0';
+        (*base)[len].age = rand()%100;
+        printf("%s %s %d\n", (*base)[len].name, (*base)[len].number, (*base)[len].age);
+        n1-= 1;
+        len += 1;
+    }
+}
+void output(struct voter **base, int len, char *d){
+    printf("--------------------------------%d", len);
+    if (d == "U"){
+        for (int i = 0; i < len; i++){
+            printf("%s %s %d\n", (*base)[i].name, (*base)[i].number, (*base)[i].age);
+        }
+    }
+    if (d == "D"){
+        for (int i = len - 1; i > -1; i--){
+            printf("%s %s %d\n", (*base)[i].name, (*base)[i].number, (*base)[i].age);
+        }
+    }
+}
+int test(char *s, char *f, char *d){
+    int check = 0;
+    if (s == NULL){
+        printf("Не указан тип сортировки.\n");
+        check = 1;
+    }
+    if (f == NULL){
+        printf("Не указано поле сортировки.\n");
+        check = 1;
+    }
+    if (d == NULL){
+        printf("Не указано направление сортировки.\n");
+        check = 1;
+    }
+    if (check == 1){
+        return 1;
+    }
+    return 2;
+}
+void swap(struct voter **base, int i, int j){
+    struct voter tmp;
+    tmp = (*base)[i];
+    (*base)[i] = (*base)[j];
+    (*base)[j] = tmp;
+}
+void oddevensortname(struct voter **base, int len){
+    int check = 0;
+    while (check == 0){
+        check = 1;
+        for (int i = 1; i < len - 1; i += 2){
+            if (strcmp((*base)[i].name, (*base)[i+1].name) > 0){
+                swap(&*base, i, i + 1);
+                check = 0;
+            }
+        }
+        for (int i = 0; i < len - 1; i += 2){
+            if (strcmp((*base)[i].name, (*base)[i+1].name) > 0){
+                swap(&*base, i, i + 1);
+                check = 0;
+            }
+        }
+    }
+}
+void oddevensortnumber(struct voter **base, int len){
+    int check = 0;
+    while (check == 0){
+        check = 1;
+        for (int i = 1; i < len - 1; i += 2){
+            if (strcmp((*base)[i].number, (*base)[i+1].number) > 0){
+                swap(&*base, i, i + 1);
+                check = 0;
+            }
+        }
+        for (int i = 0; i < len - 1; i += 2){
+            if (strcmp((*base)[i].number, (*base)[i+1].number) > 0){
+                swap(&*base, i, i + 1);
+                check = 0;
+            }
+        }
+    }
+}
+void oddevensortage(struct voter **base, int len){
+    int check = 0;
+    while (check == 0){
+        check = 1;
+        for (int i = 1; i < len - 1; i += 2){
+            if ((*base)[i].age > (*base)[i+1].age){
+                swap(&*base, i, i+1);
+                check = 0;
+            }
+        }
+        for (int i = 0; i < len - 1; i += 2){
+            if ((*base)[i].age > (*base)[i + 1].age){
+                swap(&*base, i, i + 1);
+                check = 0;
+            }
+        }
+    }
+}
+void shellsortname(struct voter **base, int len){
+    for (int step = len / 2; step > 0; step /= 2){
+        for (int i = step; i < len; i++){
+            for (int j = i - step; j >= 0 && (strcmp((*base)[j].name, (*base)[j+step].name) > 0); j -= step){
+                swap(&*base, j, j + step);
+            }
+        }
+    }
+}
+void shellsortnumber(struct voter **base, int len){
+    for (int step = len / 2; step > 0; step /= 2){
+        for (int i = step; i < len; i++){
+            for (int j = i - step; j >= 0 && (strcmp((*base)[j].number, (*base)[j+step].number) > 0); j -= step){
+                swap(&*base, j, j + step);
+            }
+        }
+    }
+}
+void shellsortage(struct voter **base, int len){
+    for (int step = len / 2; step > 0; step /= 2){
+        for (int i = step; i < len; i++){
+            for (int j = i - step; j >= 0 && ((*base)[j].age > (*base)[j+step].age); j -= step){
+                swap(&*base, j, j + step);
+            }
+        }
+    }
+}
+int main(int argc, char **argv){
+    char *s = NULL, *f = NULL, *d = NULL;
+    int check = 0;
+    int len, n1, n2;
+    struct voter *base;
+    while ((check = getopt(argc, argv, "QOSNIAUDs:e:")) != -1){
+        switch(check){
+            case 'Q':
+                s = "Q";
+                break;
+            case 'O':
+                s = "O";
+                break;
+            case 'S':
+                s = "S";
+                break;
+            case 'N':
+                f = "N";
+                break;
+            case 'I':
+                f = "I";
+                break;
+            case 'A':
+                f = "A";
+                break;
+            case 'U':
+                d = "U";
+                break;
+            case 'D':
+                d = "D";
+                break;
+            case 's':
+                n1 = strtol(optarg, NULL, 10);
+                break;
+            case 'e':
+                n2 = strtol(optarg, NULL, 10);
+                break;
+            case '?':
+                return 0;
+        }
+    }
+    len = n1;
+    input1(n1, &base);
+if (s == "Q"){
+        if (f == "A"){
+            qsort(&base, len, sizeof(struct voter), (int(*) (const void *, const void *)) comp);
+        }
+        if (f == "N"){
+            qsort(&base, len, sizeof(struct voter), (int(*) (const void *, const void *)) comp2);
+        }
+        if (f == "I"){
+            qsort(&base, len, sizeof(struct voter), (int(*) (const void *, const void *)) comp3);
+        }
+    }
+    if (s == "O"){
+        if (f == "A"){
+            oddevensortage(&base, len);
+        }
+        if (f == "N"){
+            oddevensortname(&base, len);
+        }
+        if (f == "I"){
+            oddevensortnumber(&base, len);
+        }
+    }
+    if (s == "S"){
+        if (f == "A"){
+            shellsortage(&base, len);
+        }
+        if (f == "N"){
+            shellsortname(&base, len);
+        }
+        if (f == "I"){
+            shellsortnumber(&base, len);
+        }
+    }
+    printf("%s %s %d\n", (base)[n1-1].name, (base)[n1-1].number, (base)[n1-1].age);
+//    output(&base, len, d);
+//    printf("%s %s %d\n", (base)[0].name, (base)[0].number, (base)[0].age);
+    free(base);
+    return 0;
+}

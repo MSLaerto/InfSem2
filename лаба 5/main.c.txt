@@ -1,0 +1,22 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "type.h"
+#include "graph.h"
+#include "help.h"
+int main() {
+    Graph *graph = malloc(sizeof(Graph));
+    graph->size = 0;
+    graph->vertexes = malloc(sizeof(Node));
+    graph->matrix = malloc(sizeof(int*));
+    int num_func;
+    int (*fptr[])(Graph **) = {NULL, menu_show, menu_addV, menu_addE, menu_delV, menu_delE, menu_editV, menu_editE, menu_obxod, menu_way, kss, input};
+    while(num_func = menu()){
+        if (!fptr[num_func](&graph)){
+            break;
+        }
+    }
+    clear(&graph);
+    printf("END");
+    return 0;
+}

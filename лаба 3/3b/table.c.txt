@@ -1,0 +1,331 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "type.h"
+#include "table.h"
+#include "table.h"
+int count_rel(Table *board, char *key1){
+    int ans = 0;
+    fseek(board->fd, 2 * sizeof(int), SEEK_SET);
+    for (int i = 0; i <board->csize; i++){
+        int busy;
+        int release;
+        int len;
+        int data;
+        fread(&busy, sizeof(int), 1, board->fd);
+        fread(&release, sizeof(int), 1, board->fd);
+        fread(&len, sizeof(int), 1, board->fd);
+        char *key = malloc(sizeof(char)*(len+1));
+        for (int j = 0; j < len; j++){
+            fread(key + j, sizeof(char), 1, board->fd);
+        }
+        key[len] = '\0';
+        fread(&data, sizeof(int), 1, board->fd);
+        if (strcmp(key, key1) == 0){
+            if (release > ans){
+                ans = release;
+            }
+        }
+        free(key);
+    }
+    return ans;
+}
+int DirtyShow(Table *board){
+    printf("%d %d\n", board->msize, board->csize);
+    fseek(board->fd, 2 * sizeof(int), SEEK_SET);
+    for (int i = 0; i <board->csize; i++){
+        int busy;
+        int release;
+        int len;
+        int data;
+        fread(&busy, sizeof(int), 1, board->fd);
+        fread(&release, sizeof(int), 1, board->fd);
+        fread(&len, sizeof(int), 1, board->fd);
+        char *key = malloc(sizeof(char)*(len+1));
+        for (int j = 0; j < len; j++){
+            fread(key + j, sizeof(char), 1, board->fd);
+        }
+        key[len] = '\0';
+        fread(&data, sizeof(int), 1, board->fd);
+        printf("busy: %d rel: %d len: %d key: %s data: %d\n", busy, release, len, key, data);
+        free(key);
+    }
+    return 1;
+}
+int CleanShow(Table *board){
+    printf("%d %d\n", board->msize, board->csize);
+    fseek(board->fd, 2 * sizeof(int), SEEK_SET);
+    for (int i = 0; i <board->csize; i++){
+        int busy;
+        int release;
+        int len;
+        int data;
+        fread(&busy, sizeof(int), 1, board->fd);
+        fread(&release, sizeof(int), 1, board->fd);
+        fread(&len, sizeof(int), 1, board->fd);
+        char *key = malloc(sizeof(char)*(len+1));
+        for (int j = 0; j < len; j++){
+            fread(key + j, sizeof(char), 1, board->fd);
+        }
+        key[len] = '\0';
+        fread(&data, sizeof(int), 1, board->fd);
+        if (busy != 0){
+            printf("busy: %d rel: %d len: %d key: %s data: %d\n", busy, release, len, key, data);
+        }
+        free(key);
+    }
+    return 1;
+}
+int Reorg(Table *board){
+    int i = 0;
+    int f = 0;
+    fseek(board->fd, 2 * sizeof(int), SEEK_SET);
+    while(i < board->csize){
+        int lentmp = ftell(board->fd);
+        int busy;
+        int release;
+        int len;
+        int data;
+        fread(&busy, sizeof(int), 1, board->fd);
+        fread(&release, sizeof(int), 1, board->fd);
+        fread(&len, sizeof(int), 1, board->fd);
+        char *key = malloc(sizeof(char)*(len+1));
+        for (int j = 0; j < len; j++){
+            fread(key + j, sizeof(char), 1, board->fd);
+        }
+        key[len] = '\0';
+        fread(&data, sizeof(int), 1, board->fd);
+        if (busy == 0){
+            f += 1;
+            for (int k = i+1; k < board->csize; k++){
+                int busy2;
+                int release2;
+                int len2;
+                int data2;
+                fread(&busy2, sizeof(int), 1, board->fd);
+                fread(&release2, sizeof(int), 1, board->fd);
+                fread(&len2, sizeof(int), 1, board->fd);
+                char *key2 = malloc(sizeof(char)*(len2+1));
+                for (int l = 0; l < len2; l++){
+                    fread(key2 + l, sizeof(char), 1, board->fd);
+                }
+                key2[len2] = '\0';
+                fread(&data2, sizeof(int), 1, board->fd);
+                fseek(board->fd, -len*sizeof(char)-len2*sizeof(char)-sizeof(int)*8, SEEK_CUR);
+                fwrite(&busy2, sizeof(int), 1, board->fd);
+                fwrite(&release2, sizeof(int), 1, board->fd);
+                fwrite(&len2, sizeof(int), 1, board->fd);
+                fwrite(key2, sizeof(char), len2, board->fd);
+                fwrite(&data2, sizeof(int), 1, board->fd);
+                fseek(board->fd, len2*sizeof(char)+sizeof(int)*4, SEEK_CUR);
+                len = len2;
+                free(key2);
+            }
+            fseek(board->fd, lentmp, SEEK_SET);
+        }
+        free(key);
+        i += 1;
+    }
+    i = 0;
+    /*fseek(board->fd, sizeof(int)*2, SEEK_SET);
+    while(i < board->csize){
+        int busy;
+        int release;
+        int len;
+        int data;
+        fread(&busy, sizeof(int), 1, board->fd);
+        fread(&release, sizeof(int), 1, board->fd);
+        fread(&len, sizeof(int), 1, board->fd);
+        char *key = malloc(sizeof(char)*(len+1));
+        for (int j = 0; j < len; j++){
+            fread(key + j, sizeof(char), 1, board->fd);
+        }
+        key[len] = '\0';
+        fread(&data, sizeof(int), 1, board->fd);
+        if (busy == 0){
+            fseek(board->fd, -len*sizeof(char)-sizeof(int)*4, SEEK_CUR);
+            fwrite(&null, sizeof(int), 1, board->fd);
+            fwrite(&null, sizeof(int), 4, board->fd);
+        }
+        i += 1;
+    }*/
+    board->csize -= f;
+    return 1;
+}
+int add(Table *board, char *key, int data){
+    int busy = 1;
+    int release = count_rel(board, key) + 1;
+    int len = strlen(key);
+    fseek(board->fd, sizeof(int) * 2, SEEK_SET);
+    for (int i = 0; i < board->csize; i++){
+        fseek(board->fd, sizeof(int) * 2, SEEK_CUR);
+        int tmp;
+        fread(&tmp, sizeof(int), 1, board->fd);
+        fseek(board->fd, sizeof(char) * tmp, SEEK_CUR);
+        fseek(board->fd, sizeof(int), SEEK_CUR);
+    }
+    fwrite(&busy, sizeof(int), 1, board->fd);
+    fwrite(&release, sizeof(int), 1, board->fd);
+    fwrite(&len, sizeof(int), 1, board->fd);
+    fwrite(key, sizeof(char), len, board->fd);
+    fwrite(&data, sizeof(int), 1, board->fd);
+    board->csize += 1;
+}
+int input(Table *board) {
+    FILE *start;
+    printf("Введите название файла:\n");
+    char *st = getStr(), st1[100], st2[100];
+    start = fopen(st, "r");
+    if (start == NULL) {
+        printf("Такого файла не существует.\n");
+        free(st);
+        return 1;
+    }
+    while (!feof(start)){
+        char buf[1] = {0}, *res;
+        int f = 1, str_len = 0;
+        res = malloc(sizeof(char));
+        while(f == 1){
+            int buflen = 0;
+            fscanf(start, "%1[^\n]%n", buf, &buflen);
+            if (buflen == 1){
+                res = realloc(res, sizeof(char) * (str_len + 2));
+                res[str_len] = buf[0];
+                str_len += 1;
+            }
+            else{
+                f = 0;
+            }
+        }
+        if (str_len == 0){
+            free(res);
+            fscanf(start, "%*1[\n]");
+        }
+        else{
+            int data;
+            fscanf(start, "%*1[\n]");
+            fscanf(start, "%d", &data);
+            res[str_len] = '\0';
+            add(board, res, data);
+            free(res);
+        }
+    }
+    free(st);
+    fclose(start);
+    return 1;
+}
+int del(Table *board, char *key1, int rel){
+    fseek(board->fd, 2 * sizeof(int), SEEK_SET);
+    if (rel == 0){
+        for (int i = 0; i < board->csize; i++){
+            int busy;
+            int release;
+            int len;
+            int data;
+            fread(&busy, sizeof(int), 1, board->fd);
+            fread(&release, sizeof(int), 1, board->fd);
+            fread(&len, sizeof(int), 1, board->fd);
+            char *key = malloc(sizeof(char)*(len+1));
+            for (int j = 0; j < len; j++){
+                fread(key + j, sizeof(char), 1, board->fd);
+            }
+            key[len] = '\0';
+            fread(&data, sizeof(int), 1, board->fd);
+            if (strcmp(key1, key) == 0){
+                int tmp = 0;
+                fseek(board->fd, -len*sizeof(char)-sizeof(int)*4, SEEK_CUR);
+                fwrite(&tmp, sizeof(int), 1, board->fd);
+                fseek(board->fd, len*sizeof(char)+sizeof(int)*3, SEEK_CUR);
+            }
+            free(key);
+        }
+    }
+    else{
+        for (int i = 0; i < board->csize; i++){
+            int busy;
+            int release;
+            int len;
+            int data;
+            fread(&busy, sizeof(int), 1, board->fd);
+            fread(&release, sizeof(int), 1, board->fd);
+            fread(&len, sizeof(int), 1, board->fd);
+            char *key = malloc(sizeof(char)*(len+1));
+            for (int j = 0; j < len; j++){
+                fread(key + j, sizeof(char), 1, board->fd);
+            }
+            key[len] = '\0';
+            fread(&data, sizeof(int), 1, board->fd);
+            if (strcmp(key1, key) == 0 && release == rel){
+                int tmp = 0;
+                fseek(board->fd, -len*sizeof(char)-sizeof(int)*4, SEEK_CUR);
+                fwrite(&tmp, sizeof(int), 1, board->fd);
+                fseek(board->fd, len*sizeof(char)+sizeof(int)*3, SEEK_CUR);
+            }
+            else if (strcmp(key1, key) == 0 && release > rel){
+                int tmp = 0, r;
+                fseek(board->fd, -len*sizeof(char)-sizeof(int)*3, SEEK_CUR);
+                fread(&r, sizeof(int), 1, board->fd);
+                fseek(board->fd, -sizeof(int), SEEK_CUR);
+                r -= 1;
+                fwrite(&r, sizeof(int), 1, board->fd);
+                fseek(board->fd, len*sizeof(char)+sizeof(int)*2, SEEK_CUR);
+            }
+            free(key);
+        }
+    }
+}
+void create(Table *board, char *fname, int ms){
+    int tmp1, tmp2;
+    board->csize = 0;
+    board->msize = ms;
+    board->fd = fopen(fname, "w+b");
+    if (board->fd == NULL){
+        return;
+    }
+    fwrite(&board->msize, sizeof(int), 1, board->fd);
+    fwrite(&board->csize, sizeof(int), 1, board->fd);
+    fseek(board->fd, 0, SEEK_SET);
+}
+int load(Table *board, char *fname){
+    board->fd = fopen(fname, "r+b");
+    if (board->fd == NULL){
+        return 0;
+    }
+    fread(&board->msize, sizeof(int), 1, board->fd);
+    fread(&board->csize, sizeof(int), 1, board->fd);
+    return 1;
+}
+int find(Table *board, int *n, int **info, char *key1){
+    fseek(board->fd, 2 * sizeof(int), SEEK_SET);
+    for (int i = 0; i <board->csize; i++){
+        int busy;
+        int release;
+        int len;
+        int data;
+        fread(&busy, sizeof(int), 1, board->fd);
+        fread(&release, sizeof(int), 1, board->fd);
+        fread(&len, sizeof(int), 1, board->fd);
+        char *key = malloc(sizeof(char)*(len+1));
+        for (int j = 0; j < len; j++){
+            fread(key + j, sizeof(char), 1, board->fd);
+        }
+        key[len] = '\0';
+        printf("%s\n", key);
+        fread(&data, sizeof(int), 1, board->fd);
+        if (strcmp(key1, key) == 0){
+            (*info) = realloc(*info, sizeof(int) * (*n + 1) * 4);
+            (*info)[*n * 4] = busy;
+            (*info)[*n*4+1] = release;
+            (*info)[*n*4+2] = len;
+            (*info)[*n*4 + 3] = data;
+            (*n) += 1;
+        }
+        free(key);
+    }
+    return 0;
+}
+void save(Table *board){
+    fseek(board->fd, sizeof(int), SEEK_SET);
+    fwrite(&board->csize, sizeof(int), 1, board->fd);
+    fclose(board->fd);
+}

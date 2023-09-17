@@ -1,0 +1,16 @@
+#ifndef HELP_H
+#define HELP_H
+char *getStr();
+int getInt();
+int menu();
+int menu_show(Graph **graph);
+int menu_addV(Graph **graph);
+int menu_addE(Graph **graph);
+int menu_obxod(Graph **graph);
+int menu_delV(Graph **graph);
+int menu_delE(Graph **graph);
+int menu_editV(Graph **graph);
+int menu_editE(Graph **graph);
+int menu_way(Graph **graph);
+#endif
+

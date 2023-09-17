@@ -1,0 +1,133 @@
+#include <stdio.h>
+#include <malloc.h>
+typedef struct Line{
+    int n;
+    int *a;
+} Line;
+typedef struct Matrix{
+    int lines;
+    Line *matr;
+} Matrix;
+
+
+int getInt(int *a){
+    int n;
+    int check = 0;
+    do{
+        n = scanf("%d", a);
+        if (n < 0)
+            return 0;
+        if (n == 0){
+            if (check == 0){
+                printf("%s\n", "Error! Repeat input");
+                check = 1;
+            }
+            scanf("%*c");
+        }
+    } while (n == 0);
+    return 1;
+}
+void erase(Matrix *a){
+    int i;
+    for (i = 0; i < a->lines; ++i)
+        free(a->matr[i].a);
+    free(a->matr);
+    a->lines = 0;
+    a->matr = NULL;
+}
+int input(Matrix *rm ,Matrix *rm_new ){
+    const char *pr = "";
+    int m;
+    int i, j;
+    int *p;
+    do{
+        printf("%s\n", pr);
+        printf("Enter number of lines: --> ");
+        pr = "You are wrong; repeat, please!";
+        if(getInt(&m) == 0) {
+            return 0;
+        }
+    } while (m < 1);
+    rm->lines = m;
+    rm->matr = (Line *)calloc(m, sizeof(Line));
+    rm_new->lines = m;
+    rm_new->matr = (Line *)calloc(m, sizeof(Line));
+    for (i = 0; i < rm->lines; ++i){
+        pr = "";
+        do{
+            printf("%s\n", pr);
+            printf("Enter number of items in line %d: --> ", i + 1);
+            pr = "You are wrong; repeat, please!";
+            if (getInt(&m) == 0){
+                rm->lines = i;
+                erase(rm);
+                return 0;
+            }
+        } while (m < 1);
+        rm->matr[i].n = m;
+        p = (int *)malloc(sizeof(int)* m);
+        rm->matr[i].a = p;
+        int *p_new;
+        p_new = (int *)malloc(sizeof(int)* m);
+        rm_new->matr[i].a = p_new;
+        printf("Enter items for matrix line #%d:\n", i + 1);
+        for (j = 0; j < m; ++j, ++p)
+            if (getInt(p) == 0){
+                rm->lines = i + 1;
+                erase(rm);
+                return 0;
+            }
+    }
+    return 1;
+}
+void output(const char *msg, Matrix a){
+    int i, j;
+    int *p;
+    printf("%s:\n", msg);
+    for (i = 0; i < a.lines; ++i){
+        p = a.matr[i].a;
+        for (j = 0; j < a.matr[i].n; ++j, ++p)
+            printf("%d ", *p);
+        printf("\n");
+    }
+}
+void output_test(const char *msg, Matrix *a){
+    int i, j;
+    int *p;
+    printf("%s:\n", msg);
+    for (i = 0; i < a->lines; ++i){
+        for (j = 0; j < a->matr[i].n; ++j)
+            printf("%d ", a->matr[i].a[j]);
+        printf("\n");
+    }
+}
+void min(int a[], int m ,int a_new[], int* m_new ){
+    int res = *a;
+    int counter = 0 ;
+    int i = 0 ;
+    int f_len = m ;
+    for (; m-- > 0; ++a) {
+        if (*a < res) {
+            res = *a;
+            counter = i ;
+        }
+        i++;
+    }
+    int k =  f_len - counter;
+    for(;k>0;--a){
+        k--;
+    }
+    *m_new = f_len - counter ;
+    m = f_len;
+    for (; m-- > counter; ++a) {
+        res = *a;
+        *a_new = res;
+        ++a_new;
+    }
+}
+void line_min(Matrix pm , Matrix pm_new)
+{
+    for (int i = 0; i < pm.lines; ++i) {
+        min(pm.matr[i].a, pm.matr[i].n, pm_new.matr[i].a,  &pm_new.matr[i].n);
+    }
+}

@@ -1,0 +1,12 @@
+#ifndef HELP_H
+#define HELP_H
+char *getStr();
+int getInt();
+int menu_add(Tree **tree);
+int menu_del(Tree **tree);
+int menu_find(Tree **tree);
+int menu_max_find(Tree **tree);
+int menu_obxod(Tree **tree);
+int show1(Tree **tree);
+#endif
+
